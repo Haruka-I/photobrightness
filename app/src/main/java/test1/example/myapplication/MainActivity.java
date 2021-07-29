@@ -22,59 +22,56 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
     Button btnLoadImage;
-    TextView textSource;
+    TextView text1;
     ImageView imageResult;
-    SeekBar hueBar, satBar, valBar;
+    SeekBar hBar, sBar, vBar;
     TextView hueText, satText, valText;
     Button btnResetHSV;
 
-    final int RQS_IMAGE1 = 1;
+    final int R_IMAGE1 = 1;
 
     Uri source;
-    Bitmap bitmapMaster;
     Canvas canvasMaster;
+    Bitmap bitmapMaster;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnLoadImage = (Button) findViewById(R.id.loadimage);
-        textSource = (TextView) findViewById(R.id.sourceuri);
-        imageResult = (ImageView) findViewById(R.id.result);
+        btnLoadImage = (Button) findViewById(R.id.loadingimage);
+        text1 = (TextView) findViewById(R.id.text1);
+        imageResult = (ImageView) findViewById(R.id.get);
 
         btnLoadImage.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View arg0) {
                 Intent intent = new Intent(
                         Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, RQS_IMAGE1);
+                startActivityForResult(intent, R_IMAGE1);
             }
         });
 
-        hueText = (TextView) findViewById(R.id.texthue);
-        satText = (TextView) findViewById(R.id.textsat);
-        valText = (TextView) findViewById(R.id.textval);
-        hueBar = (SeekBar) findViewById(R.id.huebar);
-        satBar = (SeekBar) findViewById(R.id.satbar);
-        valBar = (SeekBar) findViewById(R.id.valbar);
-        hueBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        satBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        valBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        btnResetHSV = (Button)findViewById(R.id.resethsv);
-        btnResetHSV.setOnClickListener(new OnClickListener(){
+        hBar = (SeekBar) findViewById(R.id.hbar);
+        sBar = (SeekBar) findViewById(R.id.sbar);
+        vBar = (SeekBar) findViewById(R.id.vbar);
+        hueText = (TextView) findViewById(R.id.texth);
+        satText = (TextView) findViewById(R.id.texts);
+        valText = (TextView) findViewById(R.id.textv);
+        hBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        sBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        vBar.setOnSeekBarChangeListener(seekBarChangeListener);
+        btnResetHSV = (Button)findViewById(R.id.resebthsv);
+        btnResetHSV.setOnClickListener(arg0 -> {
+            // シークバーリセット位置
+            hBar.setProgress(250);
+            sBar.setProgress(250);
+            vBar.setProgress(250);
 
-            @Override
-            public void onClick(View arg0) {
-                // reset SeekBars
-                hueBar.setProgress(256);
-                satBar.setProgress(256);
-                valBar.setProgress(256);
-
-                loadBitmapHSV();
-            }});
+            loadBitmapHSV();
+        });
     }
 
     @Override
@@ -82,28 +79,25 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case RQS_IMAGE1:
-                    source = data.getData();
+            if (requestCode == R_IMAGE1) {
+                source = data.getData();
 
-                    try {
-                        bitmapMaster = BitmapFactory
-                                .decodeStream(getContentResolver().openInputStream(
-                                        source));
+                try {
+                    bitmapMaster = BitmapFactory
+                            .decodeStream(getContentResolver().openInputStream(
+                                    source));
 
-                        // reset SeekBars
-                        hueBar.setProgress(256);
-                        satBar.setProgress(256);
-                        valBar.setProgress(256);
+                    // reset SeekBars
+                    hBar.setProgress(250);
+                    sBar.setProgress(250);
+                    vBar.setProgress(250);
 
-                        loadBitmapHSV();
+                    loadBitmapHSV();
 
-                    } catch (FileNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-
-                    break;
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -133,23 +127,19 @@ public class MainActivity extends Activity {
     private void loadBitmapHSV() {
         if (bitmapMaster != null) {
 
-            int progressHue = hueBar.getProgress() - 256;
-            int progressSat = satBar.getProgress() - 256;
-            int progressVal = valBar.getProgress() - 256;
+            int progressHue = hBar.getProgress() - 250;
+            int progressSat = sBar.getProgress() - 250;
+            int progressVal = vBar.getProgress() - 250;
 
-            /*
-             * Hue (0 .. 360) Saturation (0...1) Value (0...1)
-             */
+            float h = (float) progressHue * 365 / 250;
+            float s = (float) progressSat / 250;
+            float v = (float) progressVal / 250;
 
-            float hue = (float) progressHue * 360 / 256;
-            float sat = (float) progressSat / 256;
-            float val = (float) progressVal / 256;
+            hueText.setText("色彩: " + String.valueOf(h));
+            satText.setText("彩度: " + String.valueOf(s));
+            valText.setText("明るさ: " + String.valueOf(v));
 
-            hueText.setText("色彩: " + String.valueOf(hue));
-            satText.setText("彩度: " + String.valueOf(sat));
-            valText.setText("色の階調: " + String.valueOf(val));
-
-            imageResult.setImageBitmap(updateHSV(bitmapMaster, hue, sat, val));
+            imageResult.setImageBitmap(updateHSV(bitmapMaster, h, s, v));
 
         }
     }
@@ -162,7 +152,9 @@ public class MainActivity extends Activity {
         int[] mapSrcColor = new int[w * h];
         int[] mapDestColor = new int[w * h];
 
-        float[] pixelHSV = new float[3];
+
+
+        float[] plHSV = new float[3];
 
         src.getPixels(mapSrcColor, 0, w, 0, 0, w, h);
 
@@ -170,33 +162,35 @@ public class MainActivity extends Activity {
         for (int y = 0; y < h; ++y) {
             for (int x = 0; x < w; ++x) {
 
-                // Convert from Color to HSV
-                Color.colorToHSV(mapSrcColor[index], pixelHSV);
+                // カラー変換
+                Color.colorToHSV(mapSrcColor[index], plHSV);
 
-                // Adjust HSV
-                pixelHSV[0] = pixelHSV[0] + settingHue;
-                if (pixelHSV[0] < 0.0f) {
-                    pixelHSV[0] = 0.0f;
-                } else if (pixelHSV[0] > 360.0f) {
-                    pixelHSV[0] = 360.0f;
+                // 調整
+                plHSV[0] = plHSV[0] + settingHue;
+                if (plHSV[0] < 0.0f) {
+                    plHSV[0] = 0.0f;
+                } else if (plHSV[0] > 365.0f) {
+                    plHSV[0] = 365.0f;
                 }
 
-                pixelHSV[1] = pixelHSV[1] + settingSat;
-                if (pixelHSV[1] < 0.0f) {
-                    pixelHSV[1] = 0.0f;
-                } else if (pixelHSV[1] > 1.0f) {
-                    pixelHSV[1] = 1.0f;
+                plHSV[2] = plHSV[2] + settingVal;
+                if (plHSV[2] < 0.0f) {
+                    plHSV[2] = 0.0f;
+                } else if (plHSV[2] > 1.0f) {
+                    plHSV[2] = 1.0f;
                 }
 
-                pixelHSV[2] = pixelHSV[2] + settingVal;
-                if (pixelHSV[2] < 0.0f) {
-                    pixelHSV[2] = 0.0f;
-                } else if (pixelHSV[2] > 1.0f) {
-                    pixelHSV[2] = 1.0f;
+                plHSV[1] = plHSV[1] + settingSat;
+                if (plHSV[1] < 0.0f) {
+                    plHSV[1] = 0.0f;
+                } else if (plHSV[1] > 1.0f) {
+                    plHSV[1] = 1.0f;
                 }
+
+
 
                 // Convert back from HSV to Color
-                mapDestColor[index] = Color.HSVToColor(pixelHSV);
+                mapDestColor[index] = Color.HSVToColor(plHSV);
 
                 index++;
             }

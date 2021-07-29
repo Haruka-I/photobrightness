@@ -10,20 +10,19 @@
     tools:context=".MainActivity" >
 
 
-
     <Button
-        android:id="@+id/loadimage"
+        android:id="@+id/loadingimage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Load Image 1" />
+        android:text=" フォルダ" />
 
     <TextView
-        android:id="@+id/sourceuri"
+        android:id="@+id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <ImageView
-        android:id="@+id/result"
+        android:id="@+id/get"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
@@ -31,41 +30,41 @@
         android:scaleType="centerInside" />
 
     <TextView
-        android:id="@+id/texthue"
+        android:id="@+id/texth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="色彩" />
     <SeekBar
-        android:id="@+id/huebar"
+        android:id="@+id/hbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="511"
+        android:max="500"
         android:progress="256"/>
     <TextView
-        android:id="@+id/textsat"
+        android:id="@+id/texts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="彩度" />
     <SeekBar
-        android:id="@+id/satbar"
+        android:id="@+id/sbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="511"
-        android:progress="256"/>
+        android:max="500"
+        android:progress="250"/>
     <TextView
-        android:id="@+id/textval"
+        android:id="@+id/textv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="色の階調" />
+        android:text="明るさ" />
     <SeekBar
-        android:id="@+id/valbar"
+        android:id="@+id/vbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="511"
-        android:progress="256"/>
+        android:max="500"
+        android:progress="250"/>
     <Button
-        android:id="@+id/resethsv"
+        android:id="@+id/resebthsv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reset HSV" />
+        android:text="やり直す" />
 </LinearLayout>
